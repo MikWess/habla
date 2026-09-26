@@ -1,0 +1,9 @@
+# Current character artwork
+
+- `lucia-illustrated.png`: generated using the built-in image-generation tool on 2026-09-26. Transparent 2×2 sprite sheet: idle, talking, happy, thinking. No image editing/conversion applied.
+- `michael-reference.png`: user-supplied Michael Jackson Thriller album-cover reference, copied unchanged. Third-party copyrighted reference, not an original Habla asset and not MIT-licensed. The image-generation tool blocked the request for new illustrated Michael Jackson artwork; the UI uses the supplied reference instead.
+- Earlier Blender assets are retained but no longer used by the active character component.
+
+## Lucía prompt
+
+Use case: illustration-story. Create a production-ready 2x2 character expression sprite sheet for a playful Spanish conversation web game. Exactly four equal square quadrants, no borders or text, each containing the SAME full-body adult Latina woman Lucía at identical scale and alignment, generous transparent padding. Genuinely transparent background. Modern hand-drawn editorial storybook illustration: confident charcoal outlines, flat gouache colors, subtle paper grain inside shapes, expressive proportions with long relaxed limbs, NOT 3D, not plastic, not Wii/Mii, not baby/chibi. Warm tan skin, dark wavy shoulder-length hair, gold hoop earrings, sunshine-yellow shirt, teal wide-legged overalls, coral sneakers, small daisy pocket detail. Charming, stylish, funny, welcoming adult. Top left: relaxed friendly closed-mouth smile, hands at sides. Top right: talking with an open smiling mouth and one conversational hand gesture. Bottom left: delighted eyes, broad smile, waving joyfully. Bottom right: thoughtful, hand at chin, curious raised eyebrow. All four full bodies fully within their individual equal quadrants, feet aligned at same height, heads centered same position; no overlap across cell boundaries. Designed for CSS sprite display, each quadrant will be displayed individually.

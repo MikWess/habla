@@ -15,6 +15,8 @@ try{db=JSON.parse(await readFile(savePath,'utf8'));}catch(e){if(e.code!=='ENOENT
 
 for(const session of db.sessions){
  session.deckIds ||= [session.deckId];
+ session.character ||= 'lucia';
+ for(const message of session.messages)if(message.role==='assistant')message.character ||= session.character;
  session.covered ||= [...new Set(session.messages.flatMap(m=>(m.score?.hits||[]).map(h=>h.id)))];
  if(session.mode!=='tense')session.complete=false;
  if(!session.goal){
@@ -42,7 +44,7 @@ const server=createServer(async(req,res)=>{
     if(req.method==='GET'&&url.pathname==='/api/state')return json(res,200,view());
     if(req.method!=='POST')return json(res,404,{error:'Not found.'});
     if(req.headers['content-type']!=='application/json'||typeof req.headers['x-habla-token']!=='string'||Buffer.byteLength(req.headers['x-habla-token'])!==Buffer.byteLength(token)||!timingSafeEqual(Buffer.from(req.headers['x-habla-token']),Buffer.from(token)))return json(res,403,{error:'Refresh the page to reconnect.'});
-    if(busy)return json(res,409,{error:'Lucía is finishing another reply. Try again in a moment.'});
+    if(busy)return json(res,409,{error:'Your companion is finishing another reply. Try again in a moment.'});
     let raw='';try{for await(const chunk of req){raw+=chunk;if(Buffer.byteLength(raw)>16000)return json(res,413,{error:'Message too large.'});}}catch{return json(res,400,{error:'Request interrupted.'});}
     let body;try{body=JSON.parse(raw);}catch{return json(res,400,{error:'Invalid JSON.'});}
     if(!body||typeof body!=='object')return json(res,400,{error:'Invalid request.'});
@@ -51,10 +53,12 @@ const server=createServer(async(req,res)=>{
     try{
       if(url.pathname==='/api/sessions'){
         let deck;try{deck=combineDecks(unit,body.deckIds||[body.deckId]);}catch{return json(res,400,{error:'Choose at least one valid set.'});}if(!TENSES.includes(body.tense))return json(res,400,{error:'Choose a valid deck and tense.'});
+        const character=body.character||'lucia';if(!['lucia','michael'].includes(character))return json(res,400,{error:'Choose a valid companion.'});
         const mode=body.mode||'vocabulary';if(!['vocabulary','tense'].includes(mode))return json(res,400,{error:'Choose words or tenses.'});
         const goal=makeGoal(deck,mode,body.tense,db.progress,[],true);
         if(mode==='vocabulary'&&deck.terms.some(t=>t.id==='compartir'))Object.assign(goal,{id:'compartir',label:'compartir',meaning:'to share'});
-        const session={id:randomUUID(),version:3,deckIds:deck.deckIds,covered:[],deckId:deck.id,title:deck.title,createdAt:Date.now(),updatedAt:Date.now(),mode,tense:body.tense,turns:0,attempts:0,xp:0,goal,targets:goal.kind==='word'?[goal.id]:[],recentGoals:[],scene:deck.scene||'community',complete:false,messages:[mode==='vocabulary'?{role:'assistant',text:'¡Hola! Cuéntame de tu familia. ¿Con quién pasas más tiempo?',translation:'Hi! Tell me about your family. Who do you spend the most time with?'}:openingFor(goal)],receipts:{}};
+        const session={id:randomUUID(),version:3,character,deckIds:deck.deckIds,covered:[],deckId:deck.id,title:deck.title,createdAt:Date.now(),updatedAt:Date.now(),mode,tense:body.tense,turns:0,attempts:0,xp:0,goal,targets:goal.kind==='word'?[goal.id]:[],recentGoals:[],scene:deck.scene||'community',complete:false,messages:[mode==='vocabulary'?{role:'assistant',text:'¡Hola! Cuéntame de tu familia. ¿Con quién pasas más tiempo?',translation:'Hi! Tell me about your family. Who do you spend the most time with?'}:openingFor(goal)],receipts:{}};
+        for(const message of session.messages)if(message.role==='assistant')message.character=character;
         db.sessions.unshift(session);await persist();return json(res,201,{session});
       }
       if(url.pathname==='/api/turn'){
@@ -68,7 +72,7 @@ const server=createServer(async(req,res)=>{
         const goal=session.goal;
         const score=session.mode==='tense'?scoreTurn(result,body.text,goal,deck.terms,session.messages):scoreConversation(result,body.text,deck.terms,session.covered,session.messages);
         db.progress=updateProgress(db.progress,session.mode==='tense'?[goal.id]:score.hits.map(h=>h.id),score);
-        session.messages.push({role:'user',text:body.text.trim()},{role:'assistant',text:result.reply,translation:result.translation,feedback:result.feedback,score,goal,tense:result.tense,usedTerms:result.usedTerms});
+        session.messages.push({role:'user',text:body.text.trim()},{role:'assistant',character:session.character,text:result.reply,translation:result.translation,feedback:result.feedback,score,goal,tense:result.tense,usedTerms:result.usedTerms});
         session.attempts=(session.attempts||0)+1;session.xp+=score.total;session.updatedAt=Date.now();
         if(score.goalMet){session.turns++;session.recentGoals=[...(session.recentGoals||[]),goal.id].slice(-5);session.goal=nextGoal;}
         if(session.mode!=='tense'){
@@ -89,12 +93,16 @@ const server=createServer(async(req,res)=>{
         session.suggestionAvailable=true;session.goal=makeGoal(deck,session.mode,session.tense,db.progress,[...session.recentGoals,...(session.covered||[])]);session.targets=session.goal.kind==='word'?[session.goal.id]:[];
         session.updatedAt=Date.now();await persist();return json(res,200,{session,progress:db.progress});
       }
+      if(url.pathname==='/api/character'){
+        const session=db.sessions.find(s=>s.id===body.sessionId);if(!session||!['lucia','michael'].includes(body.character))return json(res,400,{error:'Choose a valid companion.'});
+        session.character=body.character;session.updatedAt=Date.now();await persist();return json(res,200,{session});
+      }
       if(url.pathname==='/api/scene'){
         const session=db.sessions.find(s=>s.id===body.sessionId);if(!session||!['community','school','family'].includes(body.scene))return json(res,400,{error:'Invalid scene.'});
         session.scene=body.scene;await persist();return json(res,200,{session});
       }
       return json(res,404,{error:'Not found.'});
-    }catch(e){db=before;console.error('Tutor request failed:',e.name, String(e.message).replace(/sk-[\w-]+/g,'[redacted]').slice(0,250));return json(res,503,{error:'Lucía couldn’t connect. Your answer is still here — try again. Check the local server’s model/login configuration if this continues.'});}
+    }catch(e){db=before;console.error('Tutor request failed:',e.name, String(e.message).replace(/sk-[\w-]+/g,'[redacted]').slice(0,250));return json(res,503,{error:'Your companion couldn’t connect. Your answer is still here — try again. Check the local server’s model/login configuration if this continues.'});}
     finally{busy=false;}
   }
   if(vite)return vite.middlewares(req,res);

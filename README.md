@@ -1,6 +1,6 @@
 # Habla
 
-A playful Spanish conversation game. Practice with Lucía, an original toy-like 3D character modeled and rendered in Blender. Choose a deck, then practice one word, phrase, or tense per sentence. Type or use browser voice dictation; Lucía gives a short nudge and celebrates each success.
+A playful Spanish conversation game. Practice with an expressive illustrated Lucía, or select Michael Jackson’s user-supplied white-suit portrait. Choose a deck, then practice one word, phrase, or tense per sentence. Type or use browser voice dictation; Lucía gives a short nudge and celebrates each success.
 
 ## Run locally
 
@@ -44,18 +44,13 @@ AI feedback can be wrong; XP is practice feedback, not an official grade. Voice 
 
 ## Character and assets
 
-All character geometry, materials, scene props, lighting, and animation frames are original. No Nintendo or Mii assets are included. The `.blend` source is editable and the scripts reproduce the assets.
+Choose Lucía or Michael Jackson on the home screen, or switch with the companion selector during a conversation. Selection is saved per chat. Older chats default to Lucía.
 
-```sh
-# In a separate Python 3.11+ environment:
-pip install bpy pillow
-python blender/lucia.py
-python blender/props.py
-```
+Lucía uses a generated, transparent four-expression illustration sheet, with CSS idle, talking, celebration, and thinking motion. Reduced-motion preferences disable movement. Michael uses the user-supplied Thriller-cover reference photo in a portrait card, with subtle motion; generation of a new illustrated public-figure image was blocked by the image tool. No voice cloning: both use ordinary system Spanish voices. The tutor treats Michael as an explicitly fictional tribute character.
 
-Tested with Blender's `bpy` 5.0.1 on Apple Silicon. `blender/lucia.blend` contains the character and idle keyframes. The script renders 12-frame idle, talk, happy, and thinking states into transparent animated WebP images, including blinks and a happy wave. Original scene props remain available in the source for future scenes. This is a prerendered 3D character, not a live WebGL rig. Talking is a playful mouth loop, not phoneme-level lip sync. Reduced-motion preferences show the static portrait.
+See [public/character/ARTWORK.md](public/character/ARTWORK.md) for artwork sources and the illustration prompt. The supplied Michael Jackson album-cover image is third-party reference material and is not covered by this repository’s MIT license; no affiliation or endorsement is implied.
 
-The interface uses React, Vite, Lucide icons, DM Sans, and Bricolage Grotesque. Fonts currently load from Google Fonts; fallback fonts work offline.
+The earlier original Blender model and render scripts remain in `blender/` for editing, but the active UI uses illustrated/portrait assets. The interface uses React, Vite, Lucide icons, DM Sans, and Bricolage Grotesque. Fonts load from Google Fonts with offline fallbacks.
 
 ## Local-only security boundary
 
@@ -73,4 +68,4 @@ Do not expose this development server to the public internet. A public deploymen
 - `blender/` — original 3D source and reproducible render scripts
 - `tests/` — scoring and scheduling regression tests
 
-Original code and assets are under the MIT license. Source vocabulary provenance is recorded separately in SOURCES.md; no affiliation with Quizlet or Nintendo is implied.
+Original code and original assets are under the MIT license; third-party reference artwork is excluded. Source vocabulary provenance is recorded separately in SOURCES.md; no affiliation with Quizlet or Nintendo is implied.

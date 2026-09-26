@@ -5,3 +5,21 @@
 .set-selection{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:20px 0 8px;font-size:12px;color:var(--muted,#78766b)}.set-selection .understated{margin:0;font-size:12px}.coverage{font-size:12px;color:#78766b;margin:0}.result-toast{max-width:90%}.result-toast span{overflow-wrap:anywhere}
 
 .practice-character{overflow:clip}
+
+/* Four hand-drawn expression cells, one companion per conversation. */
+.character-sprite{width:100%;max-height:100%;aspect-ratio:1;background-size:200% 200%;background-repeat:no-repeat;background-position:0 0;transform-origin:50% 85%;animation:illustrated-idle 4s ease-in-out infinite}
+.character-sprite.state-talk{background-position:100% 0;animation:illustrated-talk .65s steps(1) infinite}
+.character-sprite.state-happy{background-position:0 100%;animation:illustrated-happy .7s ease-in-out infinite alternate}
+.character-sprite.state-thinking{background-position:100% 100%;animation:illustrated-idle 3s ease-in-out infinite}
+@keyframes illustrated-idle{50%{transform:rotate(1deg) translateY(-3px)}}
+@keyframes illustrated-talk{0%,65%{background-position:100% 0;transform:rotate(-.5deg)}66%,100%{background-position:0 0;transform:rotate(.5deg)}}
+@keyframes illustrated-happy{to{transform:translateY(-9px) rotate(-3deg)}}
+.character-picker{position:absolute;bottom:18px;left:12px;right:12px;display:flex;justify-content:center;gap:6px;z-index:2}.character-picker button{background:var(--paper);border:1px solid var(--line);border-radius:99px;padding:10px 15px;font-size:12px}.character-picker button[aria-pressed=true]{background:var(--ink);color:var(--paper)}
+.companion-select select{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--ink);border:0;background:transparent;max-width:185px;cursor:pointer;padding:5px 0}
+.chat-thumb .character{width:100%;height:100%}.chat-thumb .character-sprite{animation:none}
+.home-character .illustrated{padding-bottom:45px}
+@media(max-width:540px){.home-character .illustrated{transform:none;height:185px;width:100%;padding-bottom:0}.character-picker{bottom:8px}.character-picker button{padding:7px 10px;font-size:11px}.home-character .hello-note{display:none}}
+@media(prefers-reduced-motion:reduce){.character-sprite{animation:none!important;background-position:0 0!important}}
+
+.character-sprite.photo-character{width:76%;aspect-ratio:1;background-size:cover;background-position:center!important;border:9px solid var(--paper);border-radius:10px;box-shadow:0 12px 30px #39362e20;animation:photo-idle 5s ease-in-out infinite}.photo-character.state-talk{animation:photo-talk .7s ease-in-out infinite alternate}.photo-character.state-happy{animation:illustrated-happy .7s ease-in-out infinite alternate}.photo-character.state-thinking{animation:photo-idle 3s ease-in-out infinite}.chat-thumb .photo-character{width:100%;border:0;box-shadow:none}.home-character .photo-character{margin-bottom:30px}@keyframes photo-idle{50%{transform:rotate(-2deg) translateY(-3px)}}@keyframes photo-talk{to{transform:translateY(-4px) rotate(1deg)}}
+.illustrated{container-type:size}.illustrated .character-sprite{width:min(100cqw,100cqh);height:auto;max-height:none;flex-shrink:0}.illustrated .photo-character{width:min(76cqw,88cqh)}

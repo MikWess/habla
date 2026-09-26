@@ -43,3 +43,5 @@ Functional motion: 150–250ms controls, 400ms reward appearance. Speech animati
 2026-09-26: Replaced the first dashboard-like design with a single-goal conversation surface following direct user feedback. Replaced multiword/tense scoring with one 20-XP goal. Preserved saved conversations and historical points.
 
 2026-09-26: Added multi-select decks, whole-unit default, conversational Luna follow-ups, optional context-aware suggestions, and unique vocabulary coverage in place of linear word missions.
+
+2026-09-26: Replaced active Blender character with expressive hand-drawn Lucía sprites. Added companion selection, persisted per chat. Michael Jackson uses the supplied white-suit portrait because new public-figure generation was blocked. Both respect reduced motion.
