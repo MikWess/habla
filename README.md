@@ -1,6 +1,6 @@
 # Habla
 
-A playful Spanish conversation game. Practice with Lucía, an original toy-like 3D character modeled and rendered in Blender. Choose a vocabulary deck and tense, answer by typing or browser voice dictation, and get specific coaching and points for meaningful language use.
+A playful Spanish conversation game. Practice with Lucía, an original toy-like 3D character modeled and rendered in Blender. Choose a deck, then practice one word, phrase, or tense per sentence. Type or use browser voice dictation; Lucía gives a short nudge and celebrates each success.
 
 ## Run locally
 
@@ -34,13 +34,12 @@ npm start
 ## The game
 
 - **Four decks, 85 source entries:** Unit 1, *Las familias en diferentes sociedades*. Original 1.0 plus family relationships, educational communities, and global citizenship. See [data/unit-1.json](data/unit-1.json) and [SOURCES.md](SOURCES.md).
-- **Six replies per round:** Three suggested target words at a time; natural inflections and other correctly used words in the deck also count.
-- **Scoring:** +15 per distinct correctly used vocabulary item (max five per reply), +10 for a correct use of the chosen tense, +5 for an original, meaningful Spanish reply. Keyword lists do not count. The tutor judges context, then the server validates evidence against the learner's answer and calculates points.
+- **One goal at a time:** Use the displayed word or phrase in a natural sentence, or choose a separate tense practice mode. Natural inflections count. Six successful goals finish a round; misses keep the same goal for another try.
+- **Scoring:** Exactly +20 for meeting the current goal; no stacked bonuses or competing requirements. Keyword lists and copied replies do not count. The tutor judges context, then the server validates evidence against the learner's answer. Skipping a word earns no points.
 - **Retrieval before hints:** English meanings and response starters are opt-in. The learner writes or speaks an original answer.
-- **Brief corrective feedback:** One manageable correction or specific piece of praise, with an explicit tense goal. Present, preterite, imperfect, or mixed practice.
-- **A simple review scheduler:** Missed targets are due immediately; successful words use 1, 2, 4… day intervals, capped at 30 days. Current targets are avoided for one turn, then weaker/due words take priority. This is a transparent prototype scheduler, not a validated mastery estimate or full FSRS implementation.
+- **Brief corrective feedback:** One manageable correction or specific piece of praise. Tense mode offers present, preterite, imperfect, or mixed practice without an additional vocabulary requirement.
+- **A simple review scheduler:** Missed targets are due immediately; successful words use 1, 2, 4… day intervals, capped at 30 days. Recently successful targets are avoided when selecting the next word, then weaker/due words take priority. This is a transparent prototype scheduler, not a validated mastery estimate or full FSRS implementation.
 - **Saved conversations:** Resume, review the log, and continue another round. Records live in `.local/progress.json`, excluded from Git. Atomic writes, serialized mutations, and request IDs prevent duplicate scoring on retries. Keep this file to preserve progress.
-- **Interactive scene props:** Click the Blender-rendered books or family picture to choose the school/family setting for subsequent conversation.
 
 AI feedback can be wrong; XP is practice feedback, not an official grade. Voice dictation uses the browser's speech-recognition service, with transcript review before sending. It is browser-dependent, needs microphone permission, and may transmit audio to the browser vendor. Spanish playback uses available system voices. Typed practice works without microphone or speech support.
 
@@ -55,9 +54,9 @@ python blender/lucia.py
 python blender/props.py
 ```
 
-Tested with Blender's `bpy` 5.0.1 on Apple Silicon. `blender/lucia.blend` contains the character and idle keyframes. The script renders idle, talk, happy, and thinking states into transparent animated WebP images. This is a prerendered 3D character, not a live WebGL rig. Talking is a playful mouth loop, not phoneme-level lip sync. Reduced-motion preferences show the static portrait.
+Tested with Blender's `bpy` 5.0.1 on Apple Silicon. `blender/lucia.blend` contains the character and idle keyframes. The script renders 12-frame idle, talk, happy, and thinking states into transparent animated WebP images, including blinks and a happy wave. Original scene props remain available in the source for future scenes. This is a prerendered 3D character, not a live WebGL rig. Talking is a playful mouth loop, not phoneme-level lip sync. Reduced-motion preferences show the static portrait.
 
-The interface uses React, Vite, Lucide icons, DM Sans, and DM Serif Display. Fonts currently load from Google Fonts; fallback fonts work offline.
+The interface uses React, Vite, Lucide icons, DM Sans, and Bricolage Grotesque. Fonts currently load from Google Fonts; fallback fonts work offline.
 
 ## Local-only security boundary
 

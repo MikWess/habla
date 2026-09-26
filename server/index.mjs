@@ -3,7 +3,7 @@ import { readFile, writeFile, mkdir, rename } from 'node:fs/promises';
 import { randomUUID, randomBytes, timingSafeEqual } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
-import { TENSES, chooseTargets, scoreTurn, updateProgress } from './game.mjs';
+import { TENSES, makeGoal, openingFor, scoreTurn, updateProgress } from './game.mjs';
 try { process.loadEnvFile('.env'); } catch {}
 const { tutor, providerName } = await import('./tutor.mjs');
 const root=path.dirname(path.dirname(fileURLToPath(import.meta.url)));
@@ -12,6 +12,16 @@ const dataDir=process.env.HABLA_DATA_DIR||path.join(root,'.local'); await mkdir(
 const savePath=path.join(dataDir,'progress.json');
 let db={sessions:[],progress:{}};
 try{db=JSON.parse(await readFile(savePath,'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
+
+for(const session of db.sessions){
+ if(!session.goal){
+  const deck=unit.decks.find(d=>d.id===session.deckId);if(!deck)continue;
+  session.mode='vocabulary';session.version=2;session.attempts=session.messages.filter(m=>m.role==='user').length;
+  const term=deck.terms.find(t=>t.id===session.targets?.[0]);
+  session.goal=term?{kind:'word',id:term.id,label:term.es,meaning:term.en,tense:null}:makeGoal(deck,'vocabulary',session.tense,db.progress);
+  session.targets=[session.goal.id];session.recentGoals=[];
+ }
+}
 const port=Number(process.env.PORT||4347);const host='127.0.0.1';
 const token=randomBytes(24).toString('hex');
 let busy=false;
@@ -38,11 +48,9 @@ const server=createServer(async(req,res)=>{
     try{
       if(url.pathname==='/api/sessions'){
         const deck=unit.decks.find(d=>d.id===body.deckId);if(!deck||!TENSES.includes(body.tense))return json(res,400,{error:'Choose a valid deck and tense.'});
-        const defaults=deck.initialTargets || ['ayuntamiento','solidaridad','fortalecer'].filter(id=>deck.terms.some(t=>t.id===id));
-        const targets=Object.keys(db.progress).length||defaults.length<3?chooseTargets(deck.terms,db.progress):defaults;
-        const session={id:randomUUID(),deckId:deck.id,title:deck.title,createdAt:Date.now(),updatedAt:Date.now(),tense:body.tense,turns:0,xp:0,targets,scene:deck.scene||'community',complete:false,messages:[{role:'assistant',text:deck.opening,translation:deck.openingTranslation||'Hi! I’m Lucía. Let’s talk about your community.'}],receipts:{}};
-        if(targets.join()!==defaults.join()) {session.messages[0]={role:'assistant',text:`¡Hola! Hoy vamos a hablar de ${deck.title.toLowerCase()}. ¿Qué relación ves entre «${targets.map(id=>deck.terms.find(t=>t.id===id).es).join('», «')}» en tu comunidad?`,translation:'Hi! Let’s talk about this topic. How are these three ideas connected in your community?'};}
-        if(body.tense==='preterite'){session.messages[0].text+=' Cuéntamelo en pretérito: ¿qué pasó la última vez?';session.messages[0].translation+=' Tell me in the preterite: what happened last time?';}else if(body.tense==='imperfect'){session.messages[0].text+=' Cuéntamelo en imperfecto: ¿cómo era antes?';session.messages[0].translation+=' Tell me in the imperfect: what was it like before?';}
+        const mode=body.mode||'vocabulary';if(!['vocabulary','tense'].includes(mode))return json(res,400,{error:'Choose words or tenses.'});
+        const goal=makeGoal(deck,mode,body.tense,db.progress,[],true);
+        const session={id:randomUUID(),version:2,deckId:deck.id,title:deck.title,createdAt:Date.now(),updatedAt:Date.now(),mode,tense:body.tense,turns:0,attempts:0,xp:0,goal,targets:goal.kind==='word'?[goal.id]:[],recentGoals:[],scene:deck.scene||'community',complete:false,messages:[openingFor(goal)],receipts:{}};
         db.sessions.unshift(session);await persist();return json(res,201,{session});
       }
       if(url.pathname==='/api/turn'){
@@ -50,13 +58,25 @@ const server=createServer(async(req,res)=>{
         if(typeof body.requestId!=='string'||body.requestId.length>80)return json(res,400,{error:'Missing request ID.'});
         if(session.receipts?.[body.requestId])return json(res,200,{session,progress:db.progress,result:session.receipts[body.requestId]});
         if(session.complete||!cleanText(body.text))return json(res,400,{error:session.complete?'This round is complete. Start another to keep practicing.':'Write a reply between 1 and 1,200 characters.'});
-        const deck=unit.decks.find(d=>d.id===session.deckId);const nextTargets=chooseTargets(deck.terms,db.progress,session.targets);
-        const result=await tutor({session,deck,text:body.text.trim(),nextTargets});
-        const score=scoreTurn(result,body.text,session.targets,deck.terms);
-        db.progress=updateProgress(db.progress,session.targets,score);
-        session.messages.push({role:'user',text:body.text.trim()},{role:'assistant',text:result.reply,translation:result.translation,feedback:result.feedback,score,tense:result.tense,usedTerms:result.usedTerms});
-        session.turns++;session.xp+=score.total;session.updatedAt=Date.now();session.complete=session.turns>=6;session.targets=nextTargets;
+        const deck=unit.decks.find(d=>d.id===session.deckId);
+        const nextGoal=makeGoal(deck,session.mode,session.tense,db.progress,[session.goal.id,...(session.recentGoals||[]).slice(-2)]);
+        const result=await tutor({session,deck,text:body.text.trim(),nextGoal});
+        const goal=session.goal;
+        const score=scoreTurn(result,body.text,goal,deck.terms,session.messages);
+        db.progress=updateProgress(db.progress,[goal.id],score);
+        session.messages.push({role:'user',text:body.text.trim()},{role:'assistant',text:result.reply,translation:result.translation,feedback:result.feedback,score,goal,tense:result.tense,usedTerms:result.usedTerms});
+        session.attempts=(session.attempts||0)+1;session.xp+=score.total;session.updatedAt=Date.now();
+        if(score.goalMet){session.turns++;session.recentGoals=[...(session.recentGoals||[]),goal.id].slice(-5);session.goal=nextGoal;}
+        session.complete=session.turns>=6;session.targets=session.goal.kind==='word'?[session.goal.id]:[];
         session.receipts??={};session.receipts[body.requestId]={...result,score};await persist();return json(res,200,{session,progress:db.progress,result:{...result,score}});
+      }
+      if(url.pathname==='/api/skip'){
+        const session=db.sessions.find(s=>s.id===body.sessionId);if(!session||session.complete)return json(res,400,{error:'Start a new round first.'});
+        const deck=unit.decks.find(d=>d.id===session.deckId);const old=session.goal;
+        db.progress=updateProgress(db.progress,[old.id],{hits:[],goalMet:false});
+        session.recentGoals=[...(session.recentGoals||[]),old.id].slice(-5);
+        session.goal=makeGoal(deck,session.mode,session.tense,db.progress,session.recentGoals);session.targets=session.goal.kind==='word'?[session.goal.id]:[];
+        session.messages.push(openingFor(session.goal));session.updatedAt=Date.now();await persist();return json(res,200,{session,progress:db.progress});
       }
       if(url.pathname==='/api/scene'){
         const session=db.sessions.find(s=>s.id===body.sessionId);if(!session||!['community','school','family'].includes(body.scene))return json(res,400,{error:'Invalid scene.'});

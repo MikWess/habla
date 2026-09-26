@@ -1,105 +1,112 @@
-"""Original toy character, created and rendered in Blender. Run with bpy >= 4.5.
-Outputs transparent animated WebP states and an editable .blend file.
-"""
-import bpy, math, os
+"""Lucía v2: original clay-toy character and Blender-rendered expression loops."""
+import bpy, math
 from mathutils import Vector
 from PIL import Image
 from pathlib import Path
-ROOT = Path(__file__).resolve().parents[1]
-OUT = ROOT / 'public' / 'character'
-OUT.mkdir(parents=True, exist_ok=True)
-bpy.ops.object.select_all(action='SELECT'); bpy.ops.object.delete(use_global=False)
-def mat(name, color, rough=.5):
-    m=bpy.data.materials.new(name); m.diffuse_color=(*color,1); m.use_nodes=True
-    bs=m.node_tree.nodes.get('Principled BSDF'); bs.inputs['Base Color'].default_value=(*color,1); bs.inputs['Roughness'].default_value=rough
-    return m
-skin=mat('Warm terracotta skin',(.57,.29,.16)); hair=mat('Espresso hair',(.043,.019,.014)); coral=mat('Paprika knit',(.88,.19,.105)); teal=mat('Deep teal trousers',(.075,.25,.24)); cream=mat('Cream sneakers',(.94,.86,.69)); dark=mat('Eyes and smile',(.045,.022,.02)); blush=mat('Rosy cheeks',(.7,.23,.16)); gold=mat('Small gold hoops',(.95,.59,.12),.25); white=mat('Eye glints',(.98,.98,.93)); sole=mat('Shoe sole',(.7,.63,.5)); mint=mat('Mint plinth',(.52,.68,.46)); mouthmat=mat('Mouth interior',(.19,.035,.028))
-def sphere(name,loc,scale,material,parent=None):
-    bpy.ops.mesh.primitive_uv_sphere_add(segments=32,ring_count=20,location=loc)
-    o=bpy.context.object; o.name=name; o.scale=scale; o.data.materials.append(material)
-    for p in o.data.polygons:p.use_smooth=True
-    if parent:o.parent=parent
-    return o
-def empty(name,loc):
-    o=bpy.data.objects.new(name,None); bpy.context.collection.objects.link(o);o.location=loc;return o
-def curve(name,pts,r,material,parent=None):
-    c=bpy.data.curves.new(name,'CURVE'); c.dimensions='3D';c.bevel_depth=r;c.bevel_resolution=4
-    s=c.splines.new('BEZIER');s.bezier_points.add(len(pts)-1)
-    for p,co in zip(s.bezier_points,pts):p.co=co;p.handle_left_type='AUTO';p.handle_right_type='AUTO'
-    o=bpy.data.objects.new(name,c);bpy.context.collection.objects.link(o);o.data.materials.append(material)
-    if parent:o.parent=parent
-    return o
-root=empty('Lucia body rig',(0,0,0))
-head=empty('Head pivot',(0,0,2.5));head.parent=root
-sphere('Hair silhouette',(0,.085,.06),(.71,.57,.79),hair,head)
-sphere('Face',(0,-.10,-.01),(.62,.51,.68),skin,head)
-# Side-swept sculpted locks frame the face.
-for x,y,z,sx,sz in [(-.42,-.26,.47,.32,.38),(-.13,-.39,.61,.30,.23),(.18,-.38,.62,.29,.20),(.44,-.27,.49,.23,.32),(-.57,-.01,-.05,.16,.54),(.57,.015,-.04,.16,.5)]:
-    o=sphere('Sculpted hair lock',(x,y,z),(sx,.22,sz),hair,head);o.rotation_euler[1]=-.22
-sphere('Ponytail',(.48,.43,-.03),(.29,.29,.64),hair,head)
-sphere('Hair tie',(.52,.39,.34),(.22,.19,.10),coral,head)
-for x in [-.25,.25]:
-    sphere('Ear',(x*2.45,-.04,-.1),(.12,.13,.19),skin,head)
-    sphere('Eye',(x,-.57,.045),(.065,.031,.095),dark,head)
-    sphere('Eye sparkle',(x-.017,-.599,.075),(.016,.012,.022),white,head)
-    curve('Eyebrow',[(x-.083,-.557,.20),(x,-.581,.23),(x+.078,-.557,.211)],.023,hair,head)
-    sphere('Cheek',(x*1.4,-.508,-.14),(.087,.025,.042),blush,head)
-    bpy.ops.mesh.primitive_torus_add(major_radius=.087,minor_radius=.018,major_segments=32,minor_segments=10,location=(x*2.5,-.09,-.27),rotation=(math.pi/2,0,0))
-    o=bpy.context.object;o.name='Gold hoop';o.data.materials.append(gold);o.parent=head
-sphere('Button nose',(0,-.61,-.09),(.077,.083,.085),skin,head)
-smile=curve('Smile',[(-.15,-.566,-.24),(0,-.606,-.30),(.15,-.566,-.24)],.025,dark,head)
-mouth=sphere('Talking mouth',(0,-.59,-.267),(.105,.035,.018),mouthmat,head)
-sphere('Neck',(0,0,1.92),(.18,.17,.29),skin,root)
-sphere('Sweater',(0,0,1.47),(.46,.31,.56),coral,root)
-sphere('Ribbed hem',(0,0,1.04),(.42,.3,.075),coral,root)
-curve('Collar',[(-.19,-.22,1.88),(0,-.30,1.83),(.19,-.22,1.88)],.032,cream,root)
-for x in [-.22,.22]:
-    sphere('Trouser leg',(x,0,.65),(.19,.23,.48),teal,root)
-    sphere('Sneaker',(x,-.12,.20),(.215,.36,.16),cream,root)
-    sphere('Sole',(x,-.125,.105),(.22,.36,.06),sole,root)
-    for z in [0,.06]:curve('Laces',[(x-.09,-.39+z,.27),(x+.09,-.39+z,.27)],.013,white,root)
-left=empty('Left shoulder',(-.39,0,1.71));left.parent=root
-right=empty('Right shoulder',(.39,0,1.71));right.parent=root
+ROOT=Path(__file__).resolve().parents[1];OUT=ROOT/'public'/'character';OUT.mkdir(parents=True,exist_ok=True)
+bpy.ops.object.select_all(action='SELECT');bpy.ops.object.delete(use_global=False)
+def mat(name,c,rough=.7):
+ m=bpy.data.materials.new(name);m.diffuse_color=(*c,1);m.use_nodes=True;b=m.node_tree.nodes.get('Principled BSDF');b.inputs['Base Color'].default_value=(*c,1);b.inputs['Roughness'].default_value=rough
+ return m
+skin=mat('Caramel clay',(.60,.32,.18));hair=mat('Chocolate curls',(.074,.031,.024));shirt=mat('Sunshine knit',(.98,.62,.085));pants=mat('Lagoon blue dungarees',(.065,.40,.43));shoe=mat('Papaya trainers',(.91,.19,.11));cream=mat('Vanilla',(.98,.91,.72));white=mat('Warm white',(.99,.97,.88));ink=mat('Espresso',(.055,.022,.017));cheek=mat('Peach cheeks',(.83,.26,.17));gold=mat('Butter gold',(.98,.64,.1),.38);inside=mat('Open smile',(.23,.035,.025));island=mat('Pistachio',(.70,.77,.43));sole=mat('Trainer sole',(.94,.83,.62))
+def sphere(name,loc,scale,ma,parent=None):
+ bpy.ops.mesh.primitive_uv_sphere_add(segments=40,ring_count=24,location=loc);o=bpy.context.object;o.name=name;o.scale=scale;o.data.materials.append(ma)
+ for p in o.data.polygons:p.use_smooth=True
+ if parent:o.parent=parent
+ return o
+def empty(name,loc=(0,0,0),parent=None):
+ o=bpy.data.objects.new(name,None);bpy.context.collection.objects.link(o);o.location=loc
+ if parent:o.parent=parent
+ return o
+def curve(name,pts,r,ma,parent=None):
+ c=bpy.data.curves.new(name,'CURVE');c.dimensions='3D';c.bevel_depth=r;c.bevel_resolution=5;s=c.splines.new('BEZIER');s.bezier_points.add(len(pts)-1)
+ for p,co in zip(s.bezier_points,pts):p.co=co;p.handle_left_type='AUTO';p.handle_right_type='AUTO'
+ o=bpy.data.objects.new(name,c);bpy.context.collection.objects.link(o);o.data.materials.append(ma)
+ if parent:o.parent=parent
+ return o
+root=empty('Body rig');head=empty('Expressive head',(0,0,2.36),root)
+# A continuous bob and a soft asymmetric fringe, with fewer separate lumps.
+sphere('Bob silhouette',(0,.10,.04),(.82,.56,.81),hair,head)
+sphere('Round face',(0,-.12,-.005),(.735,.54,.68),skin,head)
+sphere('Hair crown',(0,.04,.55),(.72,.49,.31),hair,head)
+lock=sphere('Swept fringe',(-.30,-.43,.45),(.48,.18,.24),hair,head);lock.rotation_euler[1]=-.40
+lock=sphere('Fringe tip',(-.60,-.30,.25),(.19,.22,.34),hair,head);lock.rotation_euler[1]=-.16
+sphere('Right face framing curl',(.66,-.01,.14),(.16,.27,.45),hair,head)
+sphere('Pony puff',(.70,.32,.04),(.30,.28,.45),hair,head)
+sphere('Coral scrunchie',(.71,.25,.34),(.22,.20,.11),shoe,head)
+eyes=[];brows=[];happyEyes=[]
+for x in [-.265,.265]:
+ sphere('Ear',(x*2.77,-.045,-.08),(.12,.12,.17),skin,head)
+ e=sphere('Eye white',(x,-.620,.055),(.104,.037,.132),white,head);eyes.append((e,.132))
+ e=sphere('Pupil',(x+.014,-.657,.051),(.062,.020,.088),ink,head);eyes.append((e,.088))
+ e=sphere('Eye glint',(x-.004,-.677,.085),(.019,.012,.023),white,head);eyes.append((e,.023))
+ happyEyes.append(curve('Laughing eye',[(x-.09,-.63,.03),(x,-.668,.083),(x+.09,-.63,.03)],.025,ink,head))
+ brows.append(curve('Friendly eyebrow',[(x-.1,-.574,.235),(x,-.622,.255),(x+.09,-.583,.23)],.031,hair,head))
+ sphere('Peach blush',(x*1.53,-.57,-.19),(.113,.018,.062),cheek,head)
+ bpy.ops.mesh.primitive_torus_add(major_radius=.092,minor_radius=.024,major_segments=36,minor_segments=12,location=(x*2.8,-.08,-.26),rotation=(math.pi/2,0,0));o=bpy.context.object;o.name='Little gold hoop';o.parent=head;o.data.materials.append(gold)
+sphere('Button nose',(0,-.702,-.082),(.083,.096,.08),skin,head)
+smile=curve('Smile',[(-.175,-.591,-.24),(0,-.664,-.315),(.175,-.591,-.24)],.031,ink,head)
+mouth=sphere('Talking mouth',(0,-.635,-.285),(.13,.038,.062),inside,head)
+teeth=sphere('Happy teeth',(0,-.675,-.244),(.12,.016,.026),white,head)
+sphere('Neck',(0,0,1.82),(.18,.18,.23),skin,root)
+sphere('Sweater',(0,0,1.34),(.49,.33,.49),shirt,root)
+# Rounded overall bib, straps, buttons, and stitched front pocket.
+sphere('Dungaree body',(0,-.01,1.10),(.46,.34,.34),pants,root)
+sphere('Overall bib',(0,-.29,1.41),(.31,.063,.25),pants,root)
+for x in [-.255,.255]:
+ curve('Overall strap',[(x,-.19,1.72),(x,-.28,1.58),(x,-.348,1.45)],.047,pants,root)
+ sphere('Copper button',(x,-.40,1.49),(.034,.015,.034),gold,root)
+curve('Pocket stitch',[(-.11,-.366,1.37),(-.08,-.377,1.27),(0,-.38,1.24),(.08,-.377,1.27),(.11,-.366,1.37)],.009,cream,root)
+# Small daisy pin as a recognizable character detail.
+for a in range(5):
+ angle=2*math.pi*a/5;sphere('Daisy petal',(.15+.042*math.cos(angle),-.37,1.61+.042*math.sin(angle)),(.027,.014,.027),cream,root)
+sphere('Daisy middle',(.15,-.39,1.61),(.026,.014,.026),shoe,root)
+for x in [-.24,.24]:
+ sphere('Short trouser leg',(x,.01,.62),(.20,.23,.4),pants,root)
+ sphere('Rolled cuff',(x,0,.38),(.214,.238,.072),pants,root)
+ sphere('Papaya trainer',(x,-.13,.205),(.255,.38,.17),shoe,root)
+ sphere('Vanilla sole',(x,-.135,.098),(.26,.38,.065),sole,root)
+ sphere('Toe cap',(x,-.358,.209),(.231,.19,.12),cream,root)
+ for y in [-.30,-.23]:curve('Cream laces',[(x-.105,y,.34),(x+.105,y,.34)],.014,cream,root)
+left=empty('Left shoulder',(-.40,0,1.61),root);right=empty('Right shoulder',(.40,0,1.61),root)
 for arm,side in [(left,-1),(right,1)]:
-    sphere('Sleeve',(side*.13,0,-.21),(.18,.22,.34),coral,arm)
-    sphere('Forearm',(side*.22,-.035,-.51),(.12,.13,.25),skin,arm)
-    sphere('Mitten hand',(side*.25,-.06,-.7),(.15,.11,.17),skin,arm)
-    sphere('Thumb',(side*.13,-.12,-.66),(.07,.06,.10),skin,arm)
-# A soft little island beneath the character.
-bpy.ops.mesh.primitive_cylinder_add(vertices=96,radius=1.13,depth=.13,location=(0,0,-.01))
-plinth=bpy.context.object;plinth.name='Little conversation island';plinth.data.materials.append(mint)
-bev=plinth.modifiers.new('Rounded edge','BEVEL');bev.width=.08;bev.segments=4
-for p in plinth.data.polygons:p.use_smooth=True
+ sphere('Puffy sleeve',(side*.16,0,-.12),(.19,.21,.29),shirt,arm)
+ sphere('Forearm',(side*.23,-.015,-.38),(.13,.14,.21),skin,arm)
+ sphere('Soft hand',(side*.245,-.035,-.55),(.16,.135,.17),skin,arm)
+ sphere('Thumb',(side*.12,-.11,-.51),(.065,.065,.095),skin,arm)
+bpy.ops.mesh.primitive_cylinder_add(vertices=96,radius=1.1,depth=.09,location=(0,0,-.012));o=bpy.context.object;o.name='Soft round island';o.scale.y=.83;o.data.materials.append(island);b=o.modifiers.new('Soft bevel','BEVEL');b.width=.06;b.segments=4
+for p in o.data.polygons:p.use_smooth=True
 scene=bpy.context.scene;scene.render.engine='CYCLES';scene.cycles.samples=16;scene.cycles.use_denoising=True
-scene.render.resolution_x=600;scene.render.resolution_y=720;scene.render.resolution_percentage=100
-scene.render.film_transparent=True
-scene.world.color=(.65,.65,.65)
-scene.view_settings.view_transform='AgX'
+scene.render.resolution_x=640;scene.render.resolution_y=720;scene.render.resolution_percentage=100;scene.render.film_transparent=True;scene.world.color=(.8,.8,.8);scene.view_settings.view_transform='AgX'
 def area(name,loc,power,size):
-    bpy.ops.object.light_add(type='AREA',location=loc);o=bpy.context.object;o.name=name;o.data.energy=power;o.data.shape='DISK';o.data.size=size;o.rotation_euler=(Vector((0,0,1.5))-o.location).to_track_quat('-Z','Y').to_euler()
-area('Large softbox',(-3,-4,7),500,5);area('Warm fill',(4,-2,4),300,4);area('Hair rim',(1,3,6),450,3)
-bpy.ops.object.camera_add(location=(0,-8,4.0));cam=bpy.context.object;cam.rotation_euler=(Vector((0,0,1.65))-cam.location).to_track_quat('-Z','Y').to_euler();cam.data.type='ORTHO';cam.data.ortho_scale=4.0;scene.camera=cam
-scene.render.image_settings.file_format='PNG';scene.render.image_settings.color_mode='RGBA'
-# Save the actual model, lighting and keyed expressions for editing in Blender.
-for f in range(1,25):
-    a=2*math.pi*(f-1)/24
-    root.location.z=.035*math.sin(a);root.keyframe_insert(data_path='location',frame=f)
-    head.rotation_euler[1]=.05*math.sin(a);head.keyframe_insert(data_path='rotation_euler',frame=f)
-scene.frame_end=24;scene.render.fps=12
+ bpy.ops.object.light_add(type='AREA',location=loc);o=bpy.context.object;o.name=name;o.data.energy=power;o.data.size=size;o.rotation_euler=(Vector((0,0,1.5))-o.location).to_track_quat('-Z','Y').to_euler()
+area('Soft daylight',(-3,-4,7),550,5);area('Face bounce',(3,-4,3),260,4);area('Warm rim',(0,3,6),450,3)
+bpy.ops.object.camera_add(location=(.18,-9,3.55));cam=bpy.context.object;cam.rotation_euler=(Vector((0,0,1.70))-cam.location).to_track_quat('-Z','Y').to_euler();cam.data.type='ORTHO';cam.data.ortho_scale=3.9;scene.camera=cam
+scene.render.image_settings.file_format='PNG';scene.render.image_settings.color_mode='RGBA';scene.render.fps=12;scene.frame_end=12
+for f in range(1,13):
+ a=2*math.pi*(f-1)/12;root.location.z=.025*math.sin(a);root.keyframe_insert(data_path='location',frame=f);head.rotation_euler[1]=.055*math.sin(a);head.keyframe_insert(data_path='rotation_euler',frame=f)
+for e in happyEyes:e.hide_render=True
+mouth.hide_render=True;teeth.hide_render=True
 bpy.ops.wm.save_as_mainfile(filepath=str(ROOT/'blender'/'lucia.blend'))
-framesdir=ROOT/'.local'/'renders';framesdir.mkdir(parents=True,exist_ok=True)
+framesdir=ROOT/'.local'/'renders-v2';framesdir.mkdir(parents=True,exist_ok=True)
 for state in ['idle','talk','happy','thinking']:
-    frames=[]
-    for i in range(6):
-        a=2*math.pi*i/6;scene.frame_set(1)
-        root.location.z=.025*math.sin(a);head.rotation_euler=(0,.035*math.sin(a),.018*math.sin(a))
-        right.rotation_euler=(0,0,0);left.rotation_euler=(0,0,0);mouth.scale.z=.018
-        if state=='talk':mouth.scale.z=.035+.055*(.5+.5*math.sin(a*2));head.rotation_euler[1]=.05*math.sin(a);right.rotation_euler[1]=-.18
-        if state=='happy':
-            root.location.z=.07+.065*math.sin(a);right.rotation_euler[1]=-2.2+.18*math.sin(a);left.rotation_euler[1]=.25;head.rotation_euler[1]=-.09;mouth.scale.z=.065
-        if state=='thinking':head.rotation_euler[1]=.13;right.rotation_euler[0]=-.6;right.rotation_euler[1]=-1.5;mouth.scale.z=.015
-        scene.render.filepath=str(framesdir/f'{state}-{i}.png');bpy.ops.render.render(write_still=True)
-        frames.append(Image.open(scene.render.filepath).convert('RGBA'))
-        if state=='idle' and i==0:frames[0].save(OUT/'lucia.png')
-    frames[0].save(OUT/f'{state}.webp',save_all=True,append_images=frames[1:],duration=140 if state=='talk' else 220,loop=0,quality=88,method=6)
-print('Rendered Lucía: idle, talk, happy, thinking')
+ frames=[]
+ for i in range(12):
+  a=2*math.pi*i/12;scene.frame_set(1);root.location.z=.024*math.sin(a);root.rotation_euler[2]=.025*math.sin(a);head.rotation_euler=(.015*math.sin(a),.055*math.sin(a),0)
+  left.rotation_euler=(0,.10+.045*math.sin(a),0);right.rotation_euler=(0,-.10-.045*math.sin(a),0)
+  smile.hide_render=False;mouth.hide_render=True;teeth.hide_render=True
+  for eye,sz in eyes:eye.hide_render=False;eye.scale.z=sz*(.13 if i==9 else 1)
+  for e in happyEyes:e.hide_render=True
+  if state=='talk':
+   smile.hide_render=True;mouth.hide_render=False;mouth.scale=(.12+.02*math.sin(a*3),.038,.045+.06*(.5+.5*math.sin(a*3)));teeth.hide_render=False;right.rotation_euler[1]=-.30-.1*math.sin(a);head.rotation_euler[1]=-.06+.04*math.sin(a)
+  if state=='happy':
+   root.location.z=.065+.06*math.sin(a);head.rotation_euler[1]=-.11;right.rotation_euler[1]=-2.27+.23*math.sin(a*2);left.rotation_euler[1]=.35
+   smile.hide_render=True;mouth.hide_render=False;mouth.scale=(.17,.045,.10);teeth.hide_render=False
+   for eye,sz in eyes:eye.hide_render=True
+   for e in happyEyes:e.hide_render=False
+  if state=='thinking':
+   head.rotation_euler[1]=.17+.02*math.sin(a);right.rotation_euler[0]=-.65;right.rotation_euler[1]=-1.80
+  scene.render.filepath=str(framesdir/f'{state}-{i}.png');bpy.ops.render.render(write_still=True);frames.append(Image.open(scene.render.filepath).convert('RGBA'))
+  if state=='idle' and i==0:frames[0].save(OUT/'lucia.png')
+ frames[0].save(OUT/f'{state}.webp',save_all=True,append_images=frames[1:],duration=120 if state=='talk' else 180,loop=0,quality=86,method=4)
+print('Lucía v2 rendered.')
