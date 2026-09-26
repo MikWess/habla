@@ -2,7 +2,7 @@
 
 ## Product principle
 
-One sentence, one goal. The learner should be able to see what to say next without reading instructions. A word/phrase OR a tense, never simultaneous obligations. Vocabulary and tense practice are separate modes. A miss keeps the same goal; no XP is lost.
+Conversation first. The learner selects a pool of decks, then explores their vocabulary through one ongoing conversation. A suggested word is optional; any selected word counts. No mandatory word order or vocabulary round cutoff. Tense practice stays separate.
 
 ## Direction
 
@@ -26,9 +26,9 @@ Use 4/8/12/16/24/32/48px spacing steps, with a maximum app width of 1320px. Radi
 
 ## Screens
 
-Home: wordmark + chats/XP; four deck choices; words/tense switch; one primary start action; Lucía. A resume link appears when a conversation is unfinished. Word browsing is a dialog.
+Home: wordmark + chats/XP; four multi-select deck choices and a whole-unit shortcut; words/tense switch; one primary start action; Lucía. A resume link appears when a conversation is unfinished. Word browsing is a dialog.
 
-Practice: back/topic; six quiet progress dots; audio switch. One Spanish question, one target, character. One response field with dictation and send. Hints, translations, and conversation history are opt-in. Success is a small +20 toast and character reaction; a miss is one brief correction with the same target.
+Practice: back/topic; vocabulary coverage count (or tense round progress); audio switch. One conversational Spanish follow-up, an optional word suggestion, character. One response field with dictation and send. Hints, translations, and conversation history are opt-in. New vocabulary earns +20 per word and a character reaction; natural replies keep the conversation moving even without new vocabulary.
 
 Mobile preserves the prompt → target → character → reply order. No desktop sidebar collapses into another navigation system. Keep the input at 16px to avoid mobile zoom.
 
@@ -41,3 +41,5 @@ Functional motion: 150–250ms controls, 400ms reward appearance. Speech animati
 ## Decisions
 
 2026-09-26: Replaced the first dashboard-like design with a single-goal conversation surface following direct user feedback. Replaced multiword/tense scoring with one 20-XP goal. Preserved saved conversations and historical points.
+
+2026-09-26: Added multi-select decks, whole-unit default, conversational Luna follow-ups, optional context-aware suggestions, and unique vocabulary coverage in place of linear word missions.

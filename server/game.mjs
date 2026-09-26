@@ -44,10 +44,23 @@ export function updateProgress(progress, targets, score, now = Date.now()) {
   return next;
 }
 export const gradeSchema = {
- type:'object',additionalProperties:false,required:['reply','translation','feedback','meaningful','usedTerms','tense','emotion'],
- properties:{reply:{type:'string'},translation:{type:'string'},feedback:{type:'string'},meaningful:{type:'boolean'},emotion:{type:'string',enum:['happy','idle']},usedTerms:{type:'array',items:{type:'object',additionalProperties:false,required:['id','evidence','correct','reason'],properties:{id:{type:'string'},evidence:{type:'string'},correct:{type:'boolean'},reason:{type:'string'}}}},tense:{type:'object',additionalProperties:false,required:['correct','name','evidence','explanation'],properties:{correct:{type:'boolean'},name:{type:'string'},evidence:{type:'string'},explanation:{type:'string'}}}}
+ type:'object',additionalProperties:false,required:['reply','translation','feedback','meaningful','usedTerms','tense','emotion','nextTargetId'],
+ properties:{nextTargetId:{type:'string'},reply:{type:'string'},translation:{type:'string'},feedback:{type:'string'},meaningful:{type:'boolean'},emotion:{type:'string',enum:['happy','idle']},usedTerms:{type:'array',items:{type:'object',additionalProperties:false,required:['id','evidence','correct','reason'],properties:{id:{type:'string'},evidence:{type:'string'},correct:{type:'boolean'},reason:{type:'string'}}}},tense:{type:'object',additionalProperties:false,required:['correct','name','evidence','explanation'],properties:{correct:{type:'boolean'},name:{type:'string'},evidence:{type:'string'},explanation:{type:'string'}}}}
 };
 export function validateGrade(r) {
- if(!r||typeof r.reply!=='string'||!r.reply.trim()||r.reply.length>1200||typeof r.translation!=='string'||typeof r.feedback!=='string'||typeof r.meaningful!=='boolean'||!['happy','idle'].includes(r.emotion)||!Array.isArray(r.usedTerms)||r.usedTerms.length>30||!r.usedTerms.every(h=>h&&['id','evidence','reason'].every(k=>typeof h[k]==='string')&&typeof h.correct==='boolean')||!r.tense||typeof r.tense.correct!=='boolean'||!['name','evidence','explanation'].every(k=>typeof r.tense[k]==='string'))throw new Error('Invalid tutor response');
+ if(!r||typeof r.nextTargetId!=='string'||typeof r.reply!=='string'||!r.reply.trim()||r.reply.length>1200||typeof r.translation!=='string'||typeof r.feedback!=='string'||typeof r.meaningful!=='boolean'||!['happy','idle'].includes(r.emotion)||!Array.isArray(r.usedTerms)||r.usedTerms.length>30||!r.usedTerms.every(h=>h&&['id','evidence','reason'].every(k=>typeof h[k]==='string')&&typeof h.correct==='boolean')||!r.tense||typeof r.tense.correct!=='boolean'||!['name','evidence','explanation'].every(k=>typeof r.tense[k]==='string'))throw new Error('Invalid tutor response');
  return r;
+}
+
+export function combineDecks(unit, ids) {
+ if(!Array.isArray(ids)||!ids.length||ids.length>unit.decks.length||ids.some(id=>!unit.decks.some(d=>d.id===id)))throw new Error('Invalid decks');
+ const decks=unit.decks.filter(d=>ids.includes(d.id));
+ return {...decks[0],id:decks[0].id,deckIds:decks.map(d=>d.id),title:decks.length===unit.decks.length?'All of Unit 1':decks.length>1?`${decks.length} sets`:decks[0].title,terms:[...new Map(decks.flatMap(d=>d.terms).map(t=>[t.id,t])).values()]};
+}
+export function scoreConversation(result,text,terms,covered=[],history=[]){
+ const empty={hits:[],vocabulary:0,tense:0,conversation:0,total:0,targetHits:0,goalMet:false};
+ if(!result.meaningful||history.some(m=>normalize(m.text)===normalize(text)))return empty;
+ const hits=[...new Map(result.usedTerms.filter(h=>h.correct&&terms.some(t=>t.id===h.id)&&h.evidence.trim()&&normalize(text).includes(normalize(h.evidence))).map(h=>[h.id,h])).values()];
+ const fresh=hits.filter(h=>!covered.includes(h.id));
+ return {...empty,hits,vocabulary:fresh.length*20,total:fresh.length*20,targetHits:fresh.length,goalMet:hits.length>0};
 }

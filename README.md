@@ -33,13 +33,12 @@ npm start
 
 ## The game
 
-- **Four decks, 85 source entries:** Unit 1, *Las familias en diferentes sociedades*. Original 1.0 plus family relationships, educational communities, and global citizenship. See [data/unit-1.json](data/unit-1.json) and [SOURCES.md](SOURCES.md).
-- **One goal at a time:** Use the displayed word or phrase in a natural sentence, or choose a separate tense practice mode. Natural inflections count. Six successful goals finish a round; misses keep the same goal for another try.
-- **Scoring:** Exactly +20 for meeting the current goal; no stacked bonuses or competing requirements. Keyword lists and copied replies do not count. The tutor judges context, then the server validates evidence against the learner's answer. Skipping a word earns no points.
-- **Retrieval before hints:** English meanings and response starters are opt-in. The learner writes or speaks an original answer.
-- **Brief corrective feedback:** One manageable correction or specific piece of praise. Tense mode offers present, preterite, imperfect, or mixed practice without an additional vocabulary requirement.
-- **A simple review scheduler:** Missed targets are due immediately; successful words use 1, 2, 4… day intervals, capped at 30 days. Recently successful targets are avoided when selecting the next word, then weaker/due words take priority. This is a transparent prototype scheduler, not a validated mastery estimate or full FSRS implementation.
-- **Saved conversations:** Resume, review the log, and continue another round. Records live in `.local/progress.json`, excluded from Git. Atomic writes, serialized mutations, and request IDs prevent duplicate scoring on retries. Keep this file to preserve progress.
+- **Mix your sets:** All four Unit 1 decks (85 unique words) are selected by default. Toggle individual sets or select the whole unit. Vocabulary JSON and provenance are in [data/unit-1.json](data/unit-1.json) and [SOURCES.md](SOURCES.md).
+- **Have a conversation:** Lucía responds to your meaning and asks a connected follow-up. Any vocabulary from your selected sets counts, including natural inflections. The displayed word is an optional idea, not a gate. Replies without new vocabulary continue the conversation normally.
+- **Explore the whole pool:** Each newly used word earns 20 XP once per conversation. Multiple words can count together; repeats do not farm points. The words-explored counter opens the full pool with covered words checked. Vocabulary conversations have no six-turn cutoff.
+- **Separate tense practice:** Present, preterite, imperfect, or mixed; 20 XP per correct sentence and six successes per round.
+- **Support on demand:** English translations, hints, and history stay tucked away. Feedback is brief. Word-use history supports review suggestions, while Luna chooses suggestions that fit the conversation.
+- **Saved conversations:** Resume any chat. Records live in ignored `.local/progress.json`; preserve this file to keep progress. Existing chats keep their points and vocabulary history. Atomic writes, serialized mutations and request IDs prevent duplicate scoring on retries.
 
 AI feedback can be wrong; XP is practice feedback, not an official grade. Voice dictation uses the browser's speech-recognition service, with transcript review before sending. It is browser-dependent, needs microphone permission, and may transmit audio to the browser vendor. Spanish playback uses available system voices. Typed practice works without microphone or speech support.
 

@@ -3,9 +3,9 @@ import { readFile, writeFile, mkdir, rename } from 'node:fs/promises';
 import { randomUUID, randomBytes, timingSafeEqual } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
-import { TENSES, makeGoal, openingFor, scoreTurn, updateProgress } from './game.mjs';
+import { TENSES, makeGoal, openingFor, scoreTurn, updateProgress, combineDecks, scoreConversation } from './game.mjs';
 try { process.loadEnvFile('.env'); } catch {}
-const { tutor, providerName } = await import('./tutor.mjs');
+const { tutor, providerName, modelName } = await import('./tutor.mjs');
 const root=path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const unit=JSON.parse(await readFile(path.join(root,'data/unit-1.json'),'utf8'));
 const dataDir=process.env.HABLA_DATA_DIR||path.join(root,'.local'); await mkdir(dataDir,{recursive:true});
@@ -14,6 +14,9 @@ let db={sessions:[],progress:{}};
 try{db=JSON.parse(await readFile(savePath,'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
 
 for(const session of db.sessions){
+ session.deckIds ||= [session.deckId];
+ session.covered ||= [...new Set(session.messages.flatMap(m=>(m.score?.hits||[]).map(h=>h.id)))];
+ if(session.mode!=='tense')session.complete=false;
  if(!session.goal){
   const deck=unit.decks.find(d=>d.id===session.deckId);if(!deck)continue;
   session.mode='vocabulary';session.version=2;session.attempts=session.messages.filter(m=>m.role==='user').length;
@@ -27,7 +30,7 @@ const token=randomBytes(24).toString('hex');
 let busy=false;
 async function persist(){const tmp=savePath+'.tmp';await writeFile(tmp,JSON.stringify(db,null,2),{mode:0o600});await rename(tmp,savePath);}
 const json=(res,status,data)=>{res.writeHead(status,{'Content-Type':'application/json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});res.end(JSON.stringify(data));};
-const view=()=>({unit,sessions:db.sessions.map(s=>({...s})),progress:db.progress,provider:providerName,token});
+const view=()=>({unit,sessions:db.sessions.map(s=>({...s})),progress:db.progress,provider:providerName,model:modelName,token});
 const cleanText=t=>typeof t==='string'&&t.trim().length>0&&t.length<=1200;
 const vite=process.env.NODE_ENV==='production'?null:await (await import('vite')).createServer({root,server:{middlewareMode:true,host,hmr:{port:port+2000}},appType:'spa'});
 const server=createServer(async(req,res)=>{
@@ -47,10 +50,11 @@ const server=createServer(async(req,res)=>{
     const before=structuredClone(db);
     try{
       if(url.pathname==='/api/sessions'){
-        const deck=unit.decks.find(d=>d.id===body.deckId);if(!deck||!TENSES.includes(body.tense))return json(res,400,{error:'Choose a valid deck and tense.'});
+        let deck;try{deck=combineDecks(unit,body.deckIds||[body.deckId]);}catch{return json(res,400,{error:'Choose at least one valid set.'});}if(!TENSES.includes(body.tense))return json(res,400,{error:'Choose a valid deck and tense.'});
         const mode=body.mode||'vocabulary';if(!['vocabulary','tense'].includes(mode))return json(res,400,{error:'Choose words or tenses.'});
         const goal=makeGoal(deck,mode,body.tense,db.progress,[],true);
-        const session={id:randomUUID(),version:2,deckId:deck.id,title:deck.title,createdAt:Date.now(),updatedAt:Date.now(),mode,tense:body.tense,turns:0,attempts:0,xp:0,goal,targets:goal.kind==='word'?[goal.id]:[],recentGoals:[],scene:deck.scene||'community',complete:false,messages:[openingFor(goal)],receipts:{}};
+        if(mode==='vocabulary'&&deck.terms.some(t=>t.id==='compartir'))Object.assign(goal,{id:'compartir',label:'compartir',meaning:'to share'});
+        const session={id:randomUUID(),version:3,deckIds:deck.deckIds,covered:[],deckId:deck.id,title:deck.title,createdAt:Date.now(),updatedAt:Date.now(),mode,tense:body.tense,turns:0,attempts:0,xp:0,goal,targets:goal.kind==='word'?[goal.id]:[],recentGoals:[],scene:deck.scene||'community',complete:false,messages:[mode==='vocabulary'?{role:'assistant',text:'¡Hola! Cuéntame de tu familia. ¿Con quién pasas más tiempo?',translation:'Hi! Tell me about your family. Who do you spend the most time with?'}:openingFor(goal)],receipts:{}};
         db.sessions.unshift(session);await persist();return json(res,201,{session});
       }
       if(url.pathname==='/api/turn'){
@@ -58,25 +62,32 @@ const server=createServer(async(req,res)=>{
         if(typeof body.requestId!=='string'||body.requestId.length>80)return json(res,400,{error:'Missing request ID.'});
         if(session.receipts?.[body.requestId])return json(res,200,{session,progress:db.progress,result:session.receipts[body.requestId]});
         if(session.complete||!cleanText(body.text))return json(res,400,{error:session.complete?'This round is complete. Start another to keep practicing.':'Write a reply between 1 and 1,200 characters.'});
-        const deck=unit.decks.find(d=>d.id===session.deckId);
+        const deck=combineDecks(unit,session.deckIds||[session.deckId]);
         const nextGoal=makeGoal(deck,session.mode,session.tense,db.progress,[session.goal.id,...(session.recentGoals||[]).slice(-2)]);
         const result=await tutor({session,deck,text:body.text.trim(),nextGoal});
         const goal=session.goal;
-        const score=scoreTurn(result,body.text,goal,deck.terms,session.messages);
-        db.progress=updateProgress(db.progress,[goal.id],score);
+        const score=session.mode==='tense'?scoreTurn(result,body.text,goal,deck.terms,session.messages):scoreConversation(result,body.text,deck.terms,session.covered,session.messages);
+        db.progress=updateProgress(db.progress,session.mode==='tense'?[goal.id]:score.hits.map(h=>h.id),score);
         session.messages.push({role:'user',text:body.text.trim()},{role:'assistant',text:result.reply,translation:result.translation,feedback:result.feedback,score,goal,tense:result.tense,usedTerms:result.usedTerms});
         session.attempts=(session.attempts||0)+1;session.xp+=score.total;session.updatedAt=Date.now();
         if(score.goalMet){session.turns++;session.recentGoals=[...(session.recentGoals||[]),goal.id].slice(-5);session.goal=nextGoal;}
-        session.complete=session.turns>=6;session.targets=session.goal.kind==='word'?[session.goal.id]:[];
+        if(session.mode!=='tense'){
+          session.covered=[...new Set([...(session.covered||[]),...score.hits.map(h=>h.id)])];
+          const suggested=deck.terms.find(t=>t.id===result.nextTargetId&&!session.covered.includes(t.id));
+          session.suggestionAvailable=Boolean(suggested);
+          const term=suggested;
+          session.goal=term?{kind:'word',id:term.id,label:term.es,meaning:term.en,tense:null}:goal;
+        }
+        session.complete=session.mode==='tense'&&session.turns>=6;session.targets=session.goal.kind==='word'?[session.goal.id]:[];
         session.receipts??={};session.receipts[body.requestId]={...result,score};await persist();return json(res,200,{session,progress:db.progress,result:{...result,score}});
       }
       if(url.pathname==='/api/skip'){
         const session=db.sessions.find(s=>s.id===body.sessionId);if(!session||session.complete)return json(res,400,{error:'Start a new round first.'});
-        const deck=unit.decks.find(d=>d.id===session.deckId);const old=session.goal;
+        const deck=combineDecks(unit,session.deckIds||[session.deckId]);const old=session.goal;
         db.progress=updateProgress(db.progress,[old.id],{hits:[],goalMet:false});
         session.recentGoals=[...(session.recentGoals||[]),old.id].slice(-5);
-        session.goal=makeGoal(deck,session.mode,session.tense,db.progress,session.recentGoals);session.targets=session.goal.kind==='word'?[session.goal.id]:[];
-        session.messages.push(openingFor(session.goal));session.updatedAt=Date.now();await persist();return json(res,200,{session,progress:db.progress});
+        session.suggestionAvailable=true;session.goal=makeGoal(deck,session.mode,session.tense,db.progress,[...session.recentGoals,...(session.covered||[])]);session.targets=session.goal.kind==='word'?[session.goal.id]:[];
+        session.updatedAt=Date.now();await persist();return json(res,200,{session,progress:db.progress});
       }
       if(url.pathname==='/api/scene'){
         const session=db.sessions.find(s=>s.id===body.sessionId);if(!session||!['community','school','family'].includes(body.scene))return json(res,400,{error:'Invalid scene.'});
