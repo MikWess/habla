@@ -1,0 +1,547 @@
+{
+  "id": "unit-1",
+  "title": "Las familias en diferentes sociedades",
+  "description": "Family, community, and the ways we belong.",
+  "source": {
+    "author": "MISHA_PEAY",
+    "url": "https://quizlet.com/820030789/10-unit-1-las-familias-en-diferentes-sociedades-eng-to-span-flash-cards/",
+    "accessed": "2026-09-26",
+    "coverage": "85 entries across four complete Unit 1 decks (1.0–1.3), verified in the teacher’s Quizlet sets. Split 1–10 and 11–20 duplicates are not repeated.",
+    "notes": "Source English glosses preserved separately where they need a teaching correction.",
+    "sets": [
+      {
+        "id": "unit-1-0",
+        "url": "https://quizlet.com/820030789/",
+        "count": 25
+      },
+      {
+        "id": "unit-1-1",
+        "url": "https://quizlet.com/820105695/",
+        "count": 20
+      },
+      {
+        "id": "unit-1-2",
+        "url": "https://quizlet.com/945546673/",
+        "count": 20
+      },
+      {
+        "id": "unit-1-3",
+        "url": "https://quizlet.com/937846483/",
+        "count": 20
+      }
+    ]
+  },
+  "decks": [
+    {
+      "id": "unit-1-0",
+      "number": "1.0",
+      "title": "Familias y sociedades",
+      "subtitle": "The people who shape us",
+      "color": "peach",
+      "scene": "community",
+      "sourceUrl": "https://quizlet.com/820030789/",
+      "opening": "¡Hola! Soy Lucía. Queremos organizar una actividad gratuita en el barrio. ¿Qué puede hacer el ayuntamiento para fortalecer la solidaridad?",
+      "terms": [
+        {
+          "id": "rescate",
+          "es": "el rescate",
+          "en": "rescue"
+        },
+        {
+          "id": "requisito",
+          "es": "el requisito",
+          "en": "requirement"
+        },
+        {
+          "id": "ayuntamiento",
+          "es": "el ayuntamiento",
+          "en": "local government; town council"
+        },
+        {
+          "id": "gratuito",
+          "es": "gratuito",
+          "en": "free; uncalled for"
+        },
+        {
+          "id": "denunciar",
+          "es": "denunciar",
+          "en": "to denounce"
+        },
+        {
+          "id": "demostrar",
+          "es": "demostrar",
+          "en": "to demonstrate, prove, manifest"
+        },
+        {
+          "id": "medida",
+          "es": "la medida",
+          "en": "measurement; step or measure"
+        },
+        {
+          "id": "de-acuerdo-con",
+          "es": "de acuerdo con",
+          "en": "according to"
+        },
+        {
+          "id": "senalar",
+          "es": "señalar",
+          "en": "to point, signal, show"
+        },
+        {
+          "id": "cruzar",
+          "es": "cruzar",
+          "en": "to cross"
+        },
+        {
+          "id": "entrenamiento",
+          "es": "el entrenamiento",
+          "en": "training; practice"
+        },
+        {
+          "id": "apoderarse",
+          "es": "apoderarse",
+          "en": "to take possession or control (of)",
+          "sourceEn": "to empower, authorize",
+          "note": "The source gloss is misleading: apoderarse de means to take possession/control of. Apoderar can mean to authorize or empower."
+        },
+        {
+          "id": "soler",
+          "es": "soler",
+          "en": "to usually do; tend to"
+        },
+        {
+          "id": "sede",
+          "es": "la sede",
+          "en": "headquarters"
+        },
+        {
+          "id": "reto",
+          "es": "un reto",
+          "en": "challenge"
+        },
+        {
+          "id": "liderazgo",
+          "es": "el liderazgo",
+          "en": "leadership"
+        },
+        {
+          "id": "acabar",
+          "es": "acabar",
+          "en": "to end; finish"
+        },
+        {
+          "id": "fortalecer",
+          "es": "fortalecer",
+          "en": "to strengthen"
+        },
+        {
+          "id": "crecer",
+          "es": "crecer",
+          "en": "to grow"
+        },
+        {
+          "id": "debilidad",
+          "es": "la debilidad",
+          "en": "weakness"
+        },
+        {
+          "id": "similitud",
+          "es": "la similitud",
+          "en": "similarity"
+        },
+        {
+          "id": "solidaridad",
+          "es": "la solidaridad",
+          "en": "support; solidarity"
+        },
+        {
+          "id": "concertacion",
+          "es": "la concertación",
+          "en": "agreement; pact"
+        },
+        {
+          "id": "punto-de-vista",
+          "es": "un punto de vista",
+          "en": "a point of view"
+        },
+        {
+          "id": "apuntes",
+          "es": "apuntes",
+          "en": "notes; outlines"
+        }
+      ],
+      "initialTargets": [
+        "ayuntamiento",
+        "solidaridad",
+        "fortalecer"
+      ],
+      "openingTranslation": "Hi! I’m Lucía. We want to organize a free neighborhood activity. What can the town council do to strengthen solidarity?"
+    },
+    {
+      "id": "unit-1-1",
+      "number": "1.1",
+      "title": "Los lazos familiares",
+      "subtitle": "The people who feel like home",
+      "color": "sage",
+      "scene": "family",
+      "sourceUrl": "https://quizlet.com/820105695/",
+      "opening": "¡Hola! En mi familia nos gusta compartir historias de la niñez. ¿Qué suelen aportar tus parientes a la vida de tu hogar?",
+      "terms": [
+        {
+          "id": "aportar",
+          "es": "aportar",
+          "en": "to contribute"
+        },
+        {
+          "id": "compartir",
+          "es": "compartir",
+          "en": "to share"
+        },
+        {
+          "id": "cumplir",
+          "es": "cumplir",
+          "en": "to finish; accomplish"
+        },
+        {
+          "id": "salir-adelante",
+          "es": "salir adelante",
+          "en": "to get ahead"
+        },
+        {
+          "id": "unidos",
+          "es": "unidos",
+          "en": "united"
+        },
+        {
+          "id": "consentido",
+          "es": "consentido",
+          "en": "spoiled"
+        },
+        {
+          "id": "egoista",
+          "es": "egoísta",
+          "en": "selfish"
+        },
+        {
+          "id": "maduro",
+          "es": "maduro",
+          "en": "ripe; mature"
+        },
+        {
+          "id": "insensible",
+          "es": "insensible",
+          "en": "insensitive"
+        },
+        {
+          "id": "malcriado",
+          "es": "malcriado",
+          "en": "rude"
+        },
+        {
+          "id": "ninez",
+          "es": "la niñez",
+          "en": "childhood"
+        },
+        {
+          "id": "pareja",
+          "es": "la pareja",
+          "en": "couple; partner"
+        },
+        {
+          "id": "parientes",
+          "es": "los parientes",
+          "en": "relatives"
+        },
+        {
+          "id": "antepasado",
+          "es": "el antepasado",
+          "en": "ancestor"
+        },
+        {
+          "id": "brecha",
+          "es": "la brecha",
+          "en": "breach; gap; opening"
+        },
+        {
+          "id": "comportamiento",
+          "es": "el comportamiento",
+          "en": "behavior"
+        },
+        {
+          "id": "llevarse-bien",
+          "es": "llevarse bien",
+          "en": "to get along well"
+        },
+        {
+          "id": "pelea-familiar",
+          "es": "la pelea familiar",
+          "en": "family fight"
+        },
+        {
+          "id": "presupuesto",
+          "es": "el presupuesto",
+          "en": "budget"
+        },
+        {
+          "id": "hogar",
+          "es": "el hogar",
+          "en": "home"
+        }
+      ],
+      "initialTargets": [
+        "compartir",
+        "ninez",
+        "parientes"
+      ],
+      "openingTranslation": "Hi! In my family we like to share stories about childhood. What do your relatives usually contribute to life at home?"
+    },
+    {
+      "id": "unit-1-2",
+      "number": "1.2",
+      "title": "Comunidades educativas",
+      "subtitle": "Learning better, together",
+      "color": "sand",
+      "scene": "school",
+      "sourceUrl": "https://quizlet.com/945546673/",
+      "opening": "¡Hola! Queremos mejorar nuestra escuela. ¿Cómo podemos ampliar los recursos y crear un espacio adecuado para el aprendizaje?",
+      "terms": [
+        {
+          "id": "adecuado",
+          "es": "adecuado",
+          "en": "suitable; appropriate"
+        },
+        {
+          "id": "ampliar",
+          "es": "ampliar",
+          "en": "to amplify; expand"
+        },
+        {
+          "id": "arriesgado",
+          "es": "arriesgado",
+          "en": "risky; daring",
+          "sourceEn": "at risk",
+          "note": "The adjective means risky or daring; at risk is en riesgo."
+        },
+        {
+          "id": "asistencia",
+          "es": "la asistencia",
+          "en": "attendance"
+        },
+        {
+          "id": "aumentar",
+          "es": "aumentar",
+          "en": "to increase"
+        },
+        {
+          "id": "autoridades",
+          "es": "las autoridades",
+          "en": "authorities"
+        },
+        {
+          "id": "beca",
+          "es": "la beca",
+          "en": "scholarship"
+        },
+        {
+          "id": "capacitado",
+          "es": "capacitado",
+          "en": "trained; prepared"
+        },
+        {
+          "id": "falta",
+          "es": "la falta",
+          "en": "lack"
+        },
+        {
+          "id": "recursos",
+          "es": "los recursos",
+          "en": "sources; resources"
+        },
+        {
+          "id": "aportaciones",
+          "es": "las aportaciones",
+          "en": "contributions"
+        },
+        {
+          "id": "atender",
+          "es": "atender",
+          "en": "to look after; deal with; attend to"
+        },
+        {
+          "id": "aprendizaje",
+          "es": "el aprendizaje",
+          "en": "learning"
+        },
+        {
+          "id": "desarrollo",
+          "es": "el desarrollo",
+          "en": "development"
+        },
+        {
+          "id": "tasa",
+          "es": "la tasa",
+          "en": "rate"
+        },
+        {
+          "id": "apostar-por",
+          "es": "apostar por",
+          "en": "to bet on; back; commit to",
+          "sourceEn": "to bet, wager, stake",
+          "note": "In community and education contexts, apostar por often means to back or commit to."
+        },
+        {
+          "id": "sin-fines-de-lucro",
+          "es": "sin fines de lucro",
+          "en": "not for profit; charitable"
+        },
+        {
+          "id": "a-continuacion",
+          "es": "a continuación",
+          "en": "next; then; below"
+        },
+        {
+          "id": "tener-en-cuenta",
+          "es": "tener en cuenta",
+          "en": "to take into account"
+        },
+        {
+          "id": "poner-de-manifiesto",
+          "es": "poner de manifiesto",
+          "en": "to reveal; highlight"
+        }
+      ],
+      "initialTargets": [
+        "ampliar",
+        "recursos",
+        "adecuado"
+      ],
+      "openingTranslation": "Hi! We want to improve our school. How can we expand resources and create an appropriate space for learning?"
+    },
+    {
+      "id": "unit-1-3",
+      "number": "1.3",
+      "title": "Ciudadanía global",
+      "subtitle": "Your place in a bigger world",
+      "color": "sage",
+      "scene": "community",
+      "sourceUrl": "https://quizlet.com/937846483/",
+      "opening": "¡Hola! Nuestro barrio quiere ayudar a más personas. ¿Cómo podemos animar a los vecinos a involucrarse y recaudar fondos?",
+      "terms": [
+        {
+          "id": "a-medio-plazo",
+          "es": "a medio plazo",
+          "en": "in the medium term",
+          "sourceEn": "mid-term; short range",
+          "note": "Medium term, not short term."
+        },
+        {
+          "id": "alcance",
+          "es": "alcance",
+          "en": "scope; reach"
+        },
+        {
+          "id": "animar",
+          "es": "animar",
+          "en": "to encourage"
+        },
+        {
+          "id": "cuidarse",
+          "es": "cuidarse",
+          "en": "to take care of oneself",
+          "sourceEn": "to take care of",
+          "note": "The reflexive means to take care of oneself."
+        },
+        {
+          "id": "difundir",
+          "es": "difundir",
+          "en": "to spread"
+        },
+        {
+          "id": "enterarse",
+          "es": "enterarse",
+          "en": "to find out"
+        },
+        {
+          "id": "fomentar",
+          "es": "fomentar",
+          "en": "to promote"
+        },
+        {
+          "id": "imprescindible",
+          "es": "imprescindible",
+          "en": "essential"
+        },
+        {
+          "id": "involucrarse",
+          "es": "involucrarse",
+          "en": "to get involved"
+        },
+        {
+          "id": "carcel",
+          "es": "la cárcel",
+          "en": "prison"
+        },
+        {
+          "id": "discapacidad",
+          "es": "la discapacidad",
+          "en": "disability",
+          "sourceEn": null,
+          "note": "No English definition was exposed in the source page; supplied editorial translation: disability."
+        },
+        {
+          "id": "pobreza",
+          "es": "la pobreza",
+          "en": "poverty"
+        },
+        {
+          "id": "patrocinar",
+          "es": "patrocinar",
+          "en": "to sponsor"
+        },
+        {
+          "id": "promedios",
+          "es": "promedios",
+          "en": "averages",
+          "sourceEn": "average, mid point",
+          "note": "Plural form retained: averages."
+        },
+        {
+          "id": "proteger",
+          "es": "proteger",
+          "en": "to protect"
+        },
+        {
+          "id": "recaudar-fondos",
+          "es": "recaudar fondos",
+          "en": "to raise funds"
+        },
+        {
+          "id": "valorar",
+          "es": "valorar",
+          "en": "to value"
+        },
+        {
+          "id": "vincularse",
+          "es": "vincularse",
+          "en": "to be linked"
+        },
+        {
+          "id": "propiedad",
+          "es": "la propiedad",
+          "en": "property; belonging"
+        },
+        {
+          "id": "amenaza",
+          "es": "la amenaza",
+          "en": "threat"
+        }
+      ],
+      "initialTargets": [
+        "animar",
+        "involucrarse",
+        "recaudar-fondos"
+      ],
+      "openingTranslation": "Hi! Our neighborhood wants to help more people. How can we encourage neighbors to get involved and raise funds?"
+    }
+  ]
+}
