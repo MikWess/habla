@@ -2,12 +2,22 @@
 
 A playful Spanish conversation game. Practice with an expressive illustrated Lucía, or select Michael Jackson’s user-supplied white-suit portrait. Choose a deck, then practice one word, phrase, or tense per sentence. Type or use browser voice dictation; Lucía gives a short nudge and celebrates each success.
 
+## Three useful ways to practice
+
+1. **Use new vocabulary in context.** Select one or more Unit 1 decks, start a vocabulary conversation, and write a Spanish sentence using a word from the pool. Open **words explored** to see what you have used and choose something new. Vocabulary chats stay open after six turns.
+2. **Do a short tense drill.** Choose tense practice and present, preterite, imperfect, or mixed mode. Work toward six successful sentences, checking the feedback after each attempt. XP is a practice signal, not a grade.
+3. **Return to an unfinished conversation.** Reopen a saved chat, review earlier sentences and translations, and continue from its current goal. Your history stays in the local data folder between server restarts.
+
+Typed practice supports all three workflows; a microphone is optional.
+
 ## Run locally
 
 Requires Node.js 22+, npm, and a working Codex login.
 
 ```sh
-npm install
+git clone https://github.com/MikWess/habla.git
+cd habla
+npm ci
 codex login
 npm run dev
 ```
@@ -31,6 +41,8 @@ npm run build
 npm start
 ```
 
+If the tutor cannot connect, check the server output and your provider login/model settings. The app preserves the unsent answer so you can retry. `npm run build` creates frontend assets; `npm start` still runs the local Node API, so uploading `dist/` alone does not create a working tutor. Change `PORT` if 4347 is already in use.
+
 ## The game
 
 - **Mix your sets:** All four Unit 1 decks (85 unique words) are selected by default. Toggle individual sets or select the whole unit. Vocabulary JSON and provenance are in [data/unit-1.json](data/unit-1.json) and [SOURCES.md](SOURCES.md).
@@ -38,7 +50,7 @@ npm start
 - **Explore the whole pool:** Each newly used word earns 20 XP once per conversation. Multiple words can count together; repeats do not farm points. The words-explored counter opens the full pool with covered words checked. Vocabulary conversations have no six-turn cutoff.
 - **Separate tense practice:** Present, preterite, imperfect, or mixed; 20 XP per correct sentence and six successes per round.
 - **Support on demand:** English translations, hints, and history stay tucked away. Feedback is brief. Word-use history supports review suggestions, while Luna chooses suggestions that fit the conversation.
-- **Saved conversations:** Resume any chat. Records live in ignored `.local/progress.json`; preserve this file to keep progress. Existing chats keep their points and vocabulary history. Atomic writes, serialized mutations and request IDs prevent duplicate scoring on retries.
+- **Saved conversations:** Resume any chat. Records live in ignored `.local/progress.json` (or `HABLA_DATA_DIR/progress.json` if configured); preserve this file to keep progress. Existing chats keep their points and vocabulary history. Atomic writes, serialized mutations and request IDs prevent duplicate scoring on retries.
 
 AI feedback can be wrong; XP is practice feedback, not an official grade. Voice dictation uses the browser's speech-recognition service, with transcript review before sending. It is browser-dependent, needs microphone permission, and may transmit audio to the browser vendor. Spanish playback uses available system voices. Typed practice works without microphone or speech support.
 

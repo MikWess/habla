@@ -48,6 +48,8 @@ const server=createServer(async(req,res)=>{
     let raw='';try{for await(const chunk of req){raw+=chunk;if(Buffer.byteLength(raw)>16000)return json(res,413,{error:'Message too large.'});}}catch{return json(res,400,{error:'Request interrupted.'});}
     let body;try{body=JSON.parse(raw);}catch{return json(res,400,{error:'Invalid JSON.'});}
     if(!body||typeof body!=='object')return json(res,400,{error:'Invalid request.'});
+    // Body reads yield: another request may have acquired the mutation lock.
+    if(busy)return json(res,409,{error:'Your companion is finishing another reply. Try again in a moment.'});
     busy=true;
     const before=structuredClone(db);
     try{
